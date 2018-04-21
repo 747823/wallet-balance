@@ -44,7 +44,7 @@ const ADD_TXES = (state, action) => {
 // Use this when the app is first loaded
 const ADD_ALL_WALLETS = (state, action) => {
   const wallets = action.payload.map(wallet => ({
-    displayBalance: formatEthBalance(action.payload.balance),
+    displayBalance: formatEthBalance(wallet.balance),
     ...wallet
   }))
 
