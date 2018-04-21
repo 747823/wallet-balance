@@ -40,11 +40,18 @@ const ADD_TXES = (state, action) => {
   return { ...state, transactions }
 }
 
-const ADD_WALLET_FAILED = (state, action) => {
-  // TODO
+// Add (replace) all stored wallets
+// Use this when the app is first loaded
+const ADD_ALL_WALLETS = (state, action) => {
+  const wallets = action.payload.map(wallet => ({
+    displayBalance: formatEthBalance(action.payload.balance),
+    ...wallet
+  }))
+
+  return { ...state, wallets }
 }
 
-const GET_STORED_WALLETS_COMPLETE = (state, action) => {
+const ADD_WALLET_FAILED = (state, action) => {
   // TODO
 }
 
@@ -63,19 +70,20 @@ const UPDATE_BALANCE = state => {
 
 // Export all reducers separately for unit-testability
 export {
+  ADD_ALL_WALLETS,
   ADD_TXES,
   ADD_WALLET_COMPLETE,
   ADD_WALLET_FAILED,
-  GET_STORED_WALLETS_COMPLETE,
   REMOVE_WALLET_COMPLETE,
-  UPDATE_BALANCE
+  UPDATE_BALANCE,
+  defaultState
 }
 
 export default handleActions({
+  ADD_ALL_WALLETS,
   ADD_TXES,
   ADD_WALLET_COMPLETE,
   ADD_WALLET_FAILED,
-  GET_STORED_WALLETS_COMPLETE,
   REMOVE_WALLET_COMPLETE,
   UPDATE_BALANCE
 }, defaultState)

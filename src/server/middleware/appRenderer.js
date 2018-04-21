@@ -4,25 +4,30 @@ import { Provider as StoreProvider } from 'react-redux'
 import { ServerStyleSheet } from 'styled-components'
 
 import { create as createStore } from 'store'
+import { defaultState as portfolio } from 'reducers/portfolio'
+import { loadStoredData } from 'actions'
+
 import App from 'components/App'
 
-const appRenderer = () => (req, res, next) => {
-  // TODO: add server-side react router
-  // For now let's just send the same page regardless of route
+// TODO: add server-side react router
+// For now let's just send the same page regardless of route
+const appRenderer = () => async (req, res, next) => {
   res.set('Content-Type', 'text/html')
 
-  // TOOO: load initial state for SSR
-  const initialState = {
-    // Test state
-    portfolio: {
-      wallets: [],
-      transactions: [],
-      balance: '0'
-    }
+  // Create store with initial state
+  const store = createStore({ portfolio })
+
+  // Dispatch actions needed for initial load before rendering
+  // In the real world, this should probably be route-specific or even component-specific
+  // May not even want to do this for transactions and/or wallets if the response gets too big
+  try {
+    await store.dispatch(loadStoredData())
+  } catch (err) {
+    // If error, log error but proceed with default state
   }
 
   const AppContainer = () =>
-    <StoreProvider store={createStore(initialState)}>
+    <StoreProvider store={store}>
       <App />
     </StoreProvider>
 
@@ -30,13 +35,16 @@ const appRenderer = () => (req, res, next) => {
   const html = renderToString(sheet.collectStyles(<AppContainer />))
   const css = sheet.getStyleTags()
 
+  // Initial state to be injected to the client
+  const preloadedState = store.getState()
+
   res.send(`
     <!DOCTYPE html>
     <html>
       <head>
         <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'>
         <title>Wallet Balance App</title>
-        <script>window.__PRELOADED_STATE__ = ${JSON.stringify(initialState)}</script>
+        <script>window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}</script>
         <style>
           html {
             height: 100%;
